@@ -1,0 +1,106 @@
+---
+### AWS EC2 Environment settings
+
+### Route 53 Zone ID (AWS)
+# This is the Route53 HostedZoneId where you will create your Public DNS entries
+# This only needs to be defined if your CF template uses route53
+HostedZoneId: Z3IHLWJZOU9SRT
+# The region to be used, if not specified by -e in the command line
+aws_region: us-east-1
+# The key that is used to
+key_name: ocpkey
+
+## Networking (AWS)
+subdomain_base_short: "{{ guid }}"
+subdomain_base_suffix: ".example.opentlc.com"
+subdomain_base: "{{subdomain_base_short}}{{subdomain_base_suffix}}"
+zone_internal_dns: "{{guid}}.internal."
+chomped_zone_internal_dns: "{{guid}}.internal"
+
+# Security Groups
+security_groups:
+  - name: WebSG
+    rules:
+      - name: WebSGHTTPPort
+        description: "Allow HTTP port"
+        from_port: 80
+        to_port: 80
+        protocol: tcp
+        cidr: "0.0.0.0/0"
+        rule_type: Ingress
+      - name: WebSGHTTPsPort
+        description: "Allow HTTPs port"
+        from_port: 443
+        to_port: 443
+        protocol: tcp
+        cidr: "0.0.0.0/0"
+        rule_type: Ingress
+
+  - name: HostSG
+    rules:
+      - name: HostSGTCP
+        description: "Allow everything from HostSG nodes"
+        from_port: 1
+        to_port: 65535
+        protocol: tcp
+        from_group: HostSG
+        rule_type: Ingress
+      - name: HostSGUDP
+        description: "Allow everything from HostSG nodes"
+        from_port: 1
+        to_port: 65535
+        protocol: udp
+        from_group: HostSG
+        rule_type: Ingress
+
+ac_instance_count: 1
+## Environment Sizing
+# Instance Type
+__instance_type: "t2.large"
+# Image ID
+__image: "RHEL84GOLD"
+
+instances:
+  - name: bastion
+    count: 1
+    unique: true
+    public_dns: true
+    dns_loadbalancer: true
+    floating_ip: true
+    image: "{{ bastion_instance_image | default(__image) }}"
+    flavor:
+      ec2: "{{ bastion_instance_type | default(__instance_type) }}"
+    tags:
+      - key: "AnsibleGroup"
+        value: "bastions"
+      - key: "ostype"
+        value: "linux"
+      - key: "instance_filter"
+        value: "{{ env_type }}-{{ email }}"
+    rootfs_size: "{{ rootfs_size_bastion | default(50)  }}"
+    security_groups:
+      - BastionSG
+      - HostSG
+
+  - name: ac
+    count: "{{ ac_instance_count }}"
+    unique: true
+    public_dns: true
+    dns_loadbalancer: true
+    floating_ip: true
+    image: "{{ ac_instance_image | default(__image) }}"
+    flavor:
+      ec2: "{{ ac_instance_type | default(__instance_type) }}"
+    tags:
+      - key: "AnsibleGroup"
+        value: "utilities"
+      - key: "ostype"
+        value: "linux"
+      - key: "instance_filter"
+        value: "{{ env_type }}-{{ email }}"
+    security_groups:
+      - DefaultSG
+      - WebSG
+      - HostSG
+
+...
