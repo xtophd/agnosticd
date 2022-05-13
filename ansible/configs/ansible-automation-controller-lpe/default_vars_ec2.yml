@@ -61,7 +61,7 @@ __instance_type: "t2.large"
 __image: "RHEL84GOLD"
 
 instances:
-  - name: bastion
+  - name: "bastion"
     count: 1
     unique: true
     public_dns: true
@@ -70,6 +70,10 @@ instances:
     image: "{{ bastion_instance_image | default(__image) }}"
     flavor:
       ec2: "{{ bastion_instance_type | default(__instance_type) }}"
+    rootfs_size: "{{ rootfs_size_bastion | default(50)  }}"
+    security_groups:
+      - BastionSG
+      - HostSG
     tags:
       - key: "AnsibleGroup"
         value: "bastions"
@@ -77,23 +81,19 @@ instances:
         value: "linux"
       - key: "instance_filter"
         value: "{{ env_type }}-{{ email }}"
-    rootfs_size: "{{ rootfs_size_bastion | default(50)  }}"
-    security_groups:
-      - BastionSG
-      - HostSG
 
   - name: ac
-    count: "{{ ac_instance_count }}"
-    unique: true
+    count: "{{ ac_instance_count | default(1) }}"
     public_dns: true
     dns_loadbalancer: true
     floating_ip: true
     image: "{{ ac_instance_image | default(__image) }}"
     flavor:
-      ec2: "{{ ac_instance_type | default(__instance_type) }}"
+      osp: "{{ ac_instance_type | default(__instance_type) }}"
+    rootfs_size: "{{ rootfs_size_ac | default(100)  }}"
     tags:
       - key: "AnsibleGroup"
-        value: "utilities"
+        value: "acs"
       - key: "ostype"
         value: "linux"
       - key: "instance_filter"
