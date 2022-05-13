@@ -58,7 +58,7 @@ ac_instance_count: 1
 # Instance Type
 __instance_type: "t2.large"
 # Image ID
-__image: bastion-rhel84-gold
+__image: RHEL8-default
 
 instances:
   - name: "bastion"
