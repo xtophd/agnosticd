@@ -8,16 +8,17 @@ silent: false
 # ------------------------------------
 ocp4_workload_openshift_data_foundations_namespace: openshift-storage
 ocp4_workload_openshift_data_foundations_expected_crds:
-  - backingstores.noobaa.io
-  - bucketclasses.noobaa.io
-  - noobaas.noobaa.io
-  - objectbucketclaims.objectbucket.io
+- backingstores.noobaa.io
+- bucketclasses.noobaa.io
+- noobaas.noobaa.io
+- objectbucketclaims.objectbucket.io
 
 # -----------------------------------
 # OpenShift Data Foundations Operator
 # -----------------------------------
 ocp4_workload_openshift_data_foundations_operator_name: odf-operator
-ocp4_workload_openshift_data_foundations_operator_csv_prefix: ocs
+# Set prefix to empty - sometimes the install plan gets created for a CSV starting with ocs, sometimes with odf
+ocp4_workload_openshift_data_foundations_operator_csv_prefix: ""
 ocp4_workload_openshift_data_foundations_channel: stable-4.10
 ocp4_workload_openshift_data_foundations_automatic_install_plan_approval: true
 ocp4_workload_openshift_data_foundations_catalogsource_setup: false
